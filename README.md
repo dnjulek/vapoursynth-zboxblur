@@ -1,5 +1,6 @@
 # vapoursynth-zboxblur
 [![Linux](https://github.com/dnjulek/vapoursynth-zboxblur/actions/workflows/linux-build.yml/badge.svg)](https://github.com/dnjulek/vapoursynth-zboxblur/actions/workflows/linux-build.yml)
+[![Windows](https://github.com/dnjulek/vapoursynth-zboxblur/actions/workflows/windows-build.yml/badge.svg)](https://github.com/dnjulek/vapoursynth-zboxblur/actions/workflows/windows-build.yml)
 
 BoxBlur filter for vapoursynth written in ziglang.
 
