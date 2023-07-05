@@ -1,5 +1,5 @@
 const c = @cImport({
-    @cInclude("VapourSynth4.h");
+    @cInclude("vapoursynth/VapourSynth4.h");
 });
 
 const std = @import("std");
