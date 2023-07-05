@@ -28,8 +28,10 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: install zig
         run: |
-          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-          irm get.scoop.sh | iex
+          curl https://raw.githubusercontent.com/ScoopInstaller/Install/master/install.ps1 -o install.ps1
+          irm get.scoop.sh -outfile 'install.ps1'
+          .\install.ps1 -RunAsAdmin [-OtherParameters ...]
+          iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
           scoop bucket add versions
           scoop install versions/zig-dev
 
