@@ -36,6 +36,8 @@ Zig ver >= 0.11.0-dev.3886
 
 ``zig build -Doptimize=ReleaseFast``
 
+If you don't have vapoursynth installed you must provide the include path with ``-Dvsinclude=...``.
+
 ### TODO
 1. Float support (which will be less fast because it cannot divide with bitshift).
 2. hradius and vradius.
