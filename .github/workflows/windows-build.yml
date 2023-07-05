@@ -28,11 +28,11 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: install zig
         run: |
-          irm get.scoop.sh -outfile 'install.ps1'
-          .\install.ps1 [-OtherParameters ...]
+          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
           iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
           scoop bucket add versions
           scoop install versions/zig-dev
+          Add-Content -Path $Env:GITHUB_PATH -Value $HOME\scoop\shims
 
       - name: Get VapourSynth include
         run: |
