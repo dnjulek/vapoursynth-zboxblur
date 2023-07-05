@@ -43,3 +43,9 @@ jobs:
         run: |
           zig build -Doptimize=ReleaseFast -Dvsinclude=include
           ls
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: vapoursynth-zboxblur-windows
+          path: zig-out/lib/*.dll
