@@ -16,7 +16,10 @@ pub fn build(b: *std.Build) void {
     var includes = if (vsinclude != null) vsinclude.? else vs_default_path;
     lib.addIncludePath(includes);
     lib.linkLibC();
-    lib.strip = true;
+
+    if (lib.optimize == .ReleaseFast) {
+        lib.strip = true;
+    }
 
     b.installArtifact(lib);
 }
