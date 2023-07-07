@@ -42,6 +42,7 @@ jobs:
       - name: build
         run: |
           zig build -Doptimize=ReleaseFast -Dvsinclude=include
+          cd zig-out\lib
           ls
 
       - name: Upload
