@@ -134,6 +134,6 @@ export fn zboxblurCreate(in: ?*const c.VSMap, out: ?*c.VSMap, userData: ?*anyopa
 }
 
 export fn VapourSynthPluginInit2(plugin: *c.VSPlugin, vspapi: *const c.VSPLUGINAPI) void {
-    _ = vspapi.configPlugin.?("com.julek.zboxblur", "zboxblur", "VapourSynth BoxBlur with ziglang", c.VS_MAKE_VERSION(1, 0), c.VAPOURSYNTH_API_VERSION, 0, plugin);
+    _ = vspapi.configPlugin.?("com.julek.zboxblur", "zboxblur", "VapourSynth BoxBlur with ziglang", c.VS_MAKE_VERSION(2, 0), c.VAPOURSYNTH_API_VERSION, 0, plugin);
     _ = vspapi.registerFunction.?("Blur", "clip:vnode;radius:int:opt;passes:int:opt;", "clip:vnode;", zboxblurCreate, null, plugin);
 }
