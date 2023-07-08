@@ -72,3 +72,4 @@ If you don't have vapoursynth installed you must provide the include path with `
 
 ## TODO
 1. hradius and vradius.
+2. SIMD code.
