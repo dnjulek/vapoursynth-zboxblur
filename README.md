@@ -64,7 +64,7 @@ cr6p20resz.set_output(6) # Output 5000 frames in 72.87 seconds (68.61 fps)
 In this case Convolution seems slower.\
 Conclusion: for ``radius < 13`` Convolution is still the fastest, unless you use passes.
 ## Building
-Zig ver >= 0.11.0-dev.3886
+Zig ver >= 0.11.0-dev.4333
 
 ``zig build -Doptimize=ReleaseFast``
 
