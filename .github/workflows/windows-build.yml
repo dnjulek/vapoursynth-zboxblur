@@ -27,18 +27,15 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: install zig
-        run: |
-          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-          iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
-          scoop bucket add versions
-          scoop install versions/zig-dev
-          Add-Content -Path $Env:GITHUB_PATH -Value $HOME\scoop\shims
+        uses: goto-bus-stop/setup-zig@v2.1.1
+        with:
+          cache: false
 
       - name: Get VapourSynth include
         run: |
           mkdir include/vapoursynth
           curl https://raw.githubusercontent.com/vapoursynth/vapoursynth/master/include/VapourSynth4.h -o include/vapoursynth/VapourSynth4.h
-      
+
       - name: build
         run: |
           zig build -Doptimize=ReleaseFast -Dvsinclude=include
