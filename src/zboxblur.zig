@@ -6,11 +6,14 @@ const std = @import("std");
 const float_process = @import("float_process.zig");
 const int_process = @import("int_process.zig");
 const allocator = std.heap.c_allocator;
+const math = std.math;
 
 const ZboxblurData = struct {
     node: ?*c.VSNode,
-    radius: usize,
-    passes: i32,
+    hradius: usize,
+    vradius: usize,
+    hpasses: i32,
+    vpasses: i32,
     psize: u6,
 };
 
@@ -45,8 +48,8 @@ export fn zboxblurGetFrame(n: c_int, activationReason: c_int, instanceData: ?*an
                 const h: usize = @intCast(vsapi.?.getFrameHeight.?(src, plane));
                 const w: usize = @intCast(vsapi.?.getFrameWidth.?(src, plane));
 
-                int_process.hblur(u8, dstp, stride, srcp, stride, w, h, d.radius, d.passes, tmp1.ptr, tmp2.ptr, psize);
-                int_process.vblur(u8, dstp, stride, dstp, stride, w, h, d.radius, d.passes, tmp1.ptr, tmp2.ptr, psize);
+                int_process.hblur(u8, dstp, stride, srcp, stride, w, h, d.hradius, d.hpasses, tmp1.ptr, tmp2.ptr, psize);
+                int_process.vblur(u8, dstp, stride, dstp, stride, w, h, d.vradius, d.vpasses, tmp1.ptr, tmp2.ptr, psize);
             }
         } else if (psize == 2) {
             var tmp1 = allocator.alloc(u16, npixel) catch unreachable;
@@ -62,8 +65,8 @@ export fn zboxblurGetFrame(n: c_int, activationReason: c_int, instanceData: ?*an
                 const h: usize = @intCast(vsapi.?.getFrameHeight.?(src, plane));
                 const w: usize = @intCast(vsapi.?.getFrameWidth.?(src, plane));
 
-                int_process.hblur(u16, dstp, stride, srcp, stride, w, h, d.radius, d.passes, tmp1.ptr, tmp2.ptr, psize);
-                int_process.vblur(u16, dstp, stride, dstp, stride, w, h, d.radius, d.passes, tmp1.ptr, tmp2.ptr, psize);
+                int_process.hblur(u16, dstp, stride, srcp, stride, w, h, d.hradius, d.hpasses, tmp1.ptr, tmp2.ptr, psize);
+                int_process.vblur(u16, dstp, stride, dstp, stride, w, h, d.vradius, d.vpasses, tmp1.ptr, tmp2.ptr, psize);
             }
         } else {
             var tmp1 = allocator.alloc(f32, npixel) catch unreachable;
@@ -79,8 +82,8 @@ export fn zboxblurGetFrame(n: c_int, activationReason: c_int, instanceData: ?*an
                 const h: usize = @intCast(vsapi.?.getFrameHeight.?(src, plane));
                 const w: usize = @intCast(vsapi.?.getFrameWidth.?(src, plane));
 
-                float_process.hblur(f32, dstp, stride, srcp, stride, w, h, d.radius, d.passes, tmp1.ptr, tmp2.ptr, psize);
-                float_process.vblur(f32, dstp, stride, dstp, stride, w, h, d.radius, d.passes, tmp1.ptr, tmp2.ptr, psize);
+                float_process.hblur(f32, dstp, stride, srcp, stride, w, h, d.hradius, d.hpasses, tmp1.ptr, tmp2.ptr, psize);
+                float_process.vblur(f32, dstp, stride, dstp, stride, w, h, d.vradius, d.vpasses, tmp1.ptr, tmp2.ptr, psize);
             }
         }
 
@@ -105,17 +108,28 @@ export fn zboxblurCreate(in: ?*const c.VSMap, out: ?*c.VSMap, userData: ?*anyopa
     var vi: *const c.VSVideoInfo = vsapi.?.getVideoInfo.?(d.node);
 
     d.psize = @as(u6, @intCast(vi.format.bytesPerSample));
-    d.radius = @as(usize, @intCast(vsapi.?.mapGetInt.?(in, "radius", 0, &err)));
+
+    d.hradius = intSaturateCast(usize, vsapi.?.mapGetInt.?(in, "hradius", 0, &err));
     if (err != 0) {
-        d.radius = 2;
+        d.hradius = 1;
     }
 
-    d.passes = @truncate(vsapi.?.mapGetInt.?(in, "passes", 0, &err));
+    d.hpasses = intSaturateCast(i32, vsapi.?.mapGetInt.?(in, "hpasses", 0, &err));
     if (err != 0) {
-        d.passes = 1;
+        d.hpasses = 1;
     }
 
-    if ((d.radius < 1) or (d.passes < 1)) {
+    d.vradius = intSaturateCast(usize, vsapi.?.mapGetInt.?(in, "vradius", 0, &err));
+    if (err != 0) {
+        d.vradius = 1;
+    }
+
+    d.vpasses = intSaturateCast(i32, vsapi.?.mapGetInt.?(in, "vpasses", 0, &err));
+    if (err != 0) {
+        d.vpasses = 1;
+    }
+
+    if (((d.hradius < 1) or (d.hpasses < 1)) and ((d.vradius < 1) or (d.vpasses < 1))) {
         vsapi.?.mapSetError.?(out, "zboxblur: nothing to be performed");
         vsapi.?.freeNode.?(d.node);
         return;
@@ -134,6 +148,20 @@ export fn zboxblurCreate(in: ?*const c.VSMap, out: ?*c.VSMap, userData: ?*anyopa
 }
 
 export fn VapourSynthPluginInit2(plugin: *c.VSPlugin, vspapi: *const c.VSPLUGINAPI) void {
-    _ = vspapi.configPlugin.?("com.julek.zboxblur", "zboxblur", "VapourSynth BoxBlur with ziglang", c.VS_MAKE_VERSION(2, 0), c.VAPOURSYNTH_API_VERSION, 0, plugin);
-    _ = vspapi.registerFunction.?("Blur", "clip:vnode;radius:int:opt;passes:int:opt;", "clip:vnode;", zboxblurCreate, null, plugin);
+    _ = vspapi.configPlugin.?("com.julek.zboxblur", "zboxblur", "VapourSynth BoxBlur with ziglang", c.VS_MAKE_VERSION(3, 0), c.VAPOURSYNTH_API_VERSION, 0, plugin);
+    _ = vspapi.registerFunction.?("Blur", "clip:vnode;hradius:int:opt;hpasses:int:opt;vradius:int:opt;vpasses:int:opt", "clip:vnode;", zboxblurCreate, null, plugin);
+}
+
+pub inline fn intSaturateCast(comptime T: type, n: anytype) T {
+    const max = math.maxInt(T);
+    if (n > max) {
+        return max;
+    }
+
+    const min = math.minInt(T);
+    if (n < min) {
+        return min;
+    }
+
+    return @as(T, @intCast(n));
 }

@@ -6,7 +6,7 @@ BoxBlur filter for vapoursynth written in ziglang.
 
 ## Usage
 ```python
-zboxblur.Blur(vnode clip[, int radius=2, int passes=1])
+zboxblur.Blur(vnode clip[, int hradius=1, int hpasses=1, int vradius=1, int vpasses=1])
 ```
 
 ## Speed
@@ -18,7 +18,7 @@ def conv_blur(src, r, p):
     return src
 
 src = core.std.BlankClip(None, 1920, 1080, vs.GRAYS, 5000, keep=True)
-zr2p1 = src.zboxblur.Blur(2, 1)
+zr2p1 = src.zboxblur.Blur(vradius=2, hradius=2, vpasses=1, hpasses=1)
 cr2p1 = conv_blur(src, 2, 1)
 br2p1 = src.std.BoxBlur(vradius=2, hradius=2, vpasses=1, hpasses=1)
 
@@ -31,7 +31,7 @@ Faster than BoxBlur and slower than Convolution.
 What if we use it together with another filter?
 ```python
 src = core.std.BlankClip(None, 1920, 1080, vs.GRAYS, 5000, keep=True)
-zr2p1resz = src.zboxblur.Blur(2, 1).resize.Bicubic(format=vs.RGB24)
+zr2p1resz = src.zboxblur.Blur(vradius=2, hradius=2, vpasses=1, hpasses=1).resize.Bicubic(format=vs.RGB24)
 cr2p1resz = conv_blur(src, 2, 1).resize.Bicubic(format=vs.RGB24)
 br2p1resz = src.std.BoxBlur(vradius=2, hradius=2, vpasses=1, hpasses=1).resize.Bicubic(format=vs.RGB24)
 
@@ -44,9 +44,9 @@ The difference drops a bit, but Convolution is still faster.
 What if we use more passes?
 ```python
 src = core.std.BlankClip(None, 1920, 1080, vs.GRAYS, 5000, keep=True)
-zr2p2resz = src.zboxblur.Blur(2, 2).resize.Bicubic(format=vs.RGB24) 
-zr2p4resz = src.zboxblur.Blur(2, 4).resize.Bicubic(format=vs.RGB24) 
-zr6p20resz = src.zboxblur.Blur(6, 20).resize.Bicubic(format=vs.RGB24)
+zr2p2resz = src.zboxblur.Blur(vradius=2, hradius=2, vpasses=2, hpasses=2).resize.Bicubic(format=vs.RGB24)
+zr2p4resz = src.zboxblur.Blur(vradius=2, hradius=2, vpasses=4, hpasses=4).resize.Bicubic(format=vs.RGB24)
+zr6p20resz = src.zboxblur.Blur(vradius=6, hradius=6, vpasses=20, hpasses=20).resize.Bicubic(format=vs.RGB24)
 
 cr2p2resz = conv_blur(src, 2, 2).resize.Bicubic(format=vs.RGB24)
 cr2p4resz = conv_blur(src, 2, 4).resize.Bicubic(format=vs.RGB24)
@@ -69,7 +69,3 @@ Zig ver >= 0.11.0-dev.4333
 ``zig build -Doptimize=ReleaseFast``
 
 If you don't have vapoursynth installed you must provide the include path with ``-Dvsinclude=...``.
-
-## TODO
-1. hradius and vradius.
-2. SIMD code.
