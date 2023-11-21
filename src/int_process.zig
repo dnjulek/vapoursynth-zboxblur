@@ -1,6 +1,6 @@
 inline fn blur(comptime T: type, dstp: anytype, _dst_step: usize, srcp: anytype, _src_step: usize, len: usize, radius: usize, shift: u6) void {
-    var src_step = _src_step >> shift;
-    var dst_step = _dst_step >> shift;
+    const src_step = _src_step >> shift;
+    const dst_step = _dst_step >> shift;
     const iradius: i32 = @intCast(radius);
     const ksize: i32 = iradius * 2 + 1;
     const inv: i32 = @divTrunc(((1 << 16) + iradius), ksize);
@@ -8,7 +8,7 @@ inline fn blur(comptime T: type, dstp: anytype, _dst_step: usize, srcp: anytype,
 
     var x: usize = 0;
     while (x < radius) : (x += 1) {
-        var srcv: i32 = @as(i32, srcp[x * src_step]);
+        const srcv: i32 = @as(i32, srcp[x * src_step]);
         sum += srcv << 1;
     }
 
@@ -16,29 +16,29 @@ inline fn blur(comptime T: type, dstp: anytype, _dst_step: usize, srcp: anytype,
 
     x = 0;
     while (x <= radius) : (x += 1) {
-        var src1: i32 = @as(i32, srcp[(radius + x) * src_step]);
-        var src2: i32 = @as(i32, srcp[(radius - x) * src_step]);
+        const src1: i32 = @as(i32, srcp[(radius + x) * src_step]);
+        const src2: i32 = @as(i32, srcp[(radius - x) * src_step]);
         sum += (src1 - src2) * inv;
         dstp[x * dst_step] = @as(T, @intCast(sum >> 16));
     }
 
     while (x < len - radius) : (x += 1) {
-        var src1: i32 = @as(i32, srcp[(radius + x) * src_step]);
-        var src2: i32 = @as(i32, srcp[(x - radius - 1) * src_step]);
+        const src1: i32 = @as(i32, srcp[(radius + x) * src_step]);
+        const src2: i32 = @as(i32, srcp[(x - radius - 1) * src_step]);
         sum += (src1 - src2) * inv;
         dstp[x * dst_step] = @as(T, @intCast(sum >> 16));
     }
 
     while (x < len) : (x += 1) {
-        var src1: i32 = @as(i32, srcp[(2 * len - radius - x - 1) * src_step]);
-        var src2: i32 = @as(i32, srcp[(x - radius - 1) * src_step]);
+        const src1: i32 = @as(i32, srcp[(2 * len - radius - x - 1) * src_step]);
+        const src2: i32 = @as(i32, srcp[(x - radius - 1) * src_step]);
         sum += (src1 - src2) * inv;
         dstp[x * dst_step] = @as(T, @intCast(sum >> 16));
     }
 }
 
 inline fn blur_passes(comptime T: type, _dstp: [*]u8, dst_step: usize, _srcp: [*]const u8, src_step: usize, len: usize, radius: usize, _passes: i32, _tmp1: anytype, _tmp2: anytype, _psize: u6) void {
-    var srcp: [*]const T = @as([*]const T, @ptrCast(@alignCast(_srcp)));
+    const srcp: [*]const T = @as([*]const T, @ptrCast(@alignCast(_srcp)));
     var dstp: [*]T = @as([*]T, @ptrCast(@alignCast(_dstp)));
     var tmp1 = _tmp1;
     var tmp2 = _tmp2;
@@ -50,7 +50,7 @@ inline fn blur_passes(comptime T: type, _dstp: [*]u8, dst_step: usize, _srcp: [*
     blur(T, tmp1, psize, srcp, src_step, len, radius, shift);
     while (passes > 2) : (passes -= 1) {
         blur(T, tmp2, psize, tmp1, psize, len, radius, shift);
-        var tmp3 = tmp1;
+        const tmp3 = tmp1;
         tmp1 = tmp2;
         tmp2 = tmp3;
     }

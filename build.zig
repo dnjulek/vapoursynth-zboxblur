@@ -11,9 +11,9 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    var vs_default_path = if (target.isWindows()) "C:/Program Files/VapourSynth/sdk/include" else "/usr/include";
+    const vs_default_path = if (target.isWindows()) "C:/Program Files/VapourSynth/sdk/include" else "/usr/include";
     const vsinclude = b.option([]const u8, "vsinclude", "Custom path to VapourSynth include");
-    var includes = if (vsinclude != null) vsinclude.? else vs_default_path;
+    const includes = if (vsinclude != null) vsinclude.? else vs_default_path;
     lib.addIncludePath(.{ .path = includes });
     lib.linkLibC();
 

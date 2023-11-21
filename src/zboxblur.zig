@@ -19,7 +19,7 @@ const ZboxblurData = struct {
 
 export fn zboxblurGetFrame(n: c_int, activationReason: c_int, instanceData: ?*anyopaque, frameData: ?*?*anyopaque, frameCtx: ?*c.VSFrameContext, core: ?*c.VSCore, vsapi: ?*const c.VSAPI) callconv(.C) ?*const c.VSFrame {
     _ = frameData;
-    var d: *ZboxblurData = @ptrCast(@alignCast(instanceData));
+    const d: *ZboxblurData = @ptrCast(@alignCast(instanceData));
 
     if (activationReason == c.arInitial) {
         vsapi.?.requestFrameFilter.?(n, d.node, frameCtx);
@@ -30,20 +30,20 @@ export fn zboxblurGetFrame(n: c_int, activationReason: c_int, instanceData: ?*an
         const fi = vsapi.?.getVideoFrameFormat.?(src);
         const width = vsapi.?.getFrameWidth.?(src, 0);
         const height = vsapi.?.getFrameHeight.?(src, 0);
-        var dst = vsapi.?.newVideoFrame.?(fi, width, height, src, core);
+        const dst = vsapi.?.newVideoFrame.?(fi, width, height, src, core);
         const npixel: usize = @intCast(@max(width, height));
         const psize: u6 = d.psize;
 
         if (psize == 1) {
-            var tmp1 = allocator.alloc(u8, npixel) catch unreachable;
-            var tmp2 = allocator.alloc(u8, npixel) catch unreachable;
+            const tmp1 = allocator.alloc(u8, npixel) catch unreachable;
+            const tmp2 = allocator.alloc(u8, npixel) catch unreachable;
             defer allocator.free(tmp1);
             defer allocator.free(tmp2);
 
             var plane: c_int = 0;
             while (plane < fi.*.numPlanes) : (plane += 1) {
-                var srcp: [*]const u8 = vsapi.?.getReadPtr.?(src, plane);
-                var dstp: [*]u8 = vsapi.?.getWritePtr.?(dst, plane);
+                const srcp: [*]const u8 = vsapi.?.getReadPtr.?(src, plane);
+                const dstp: [*]u8 = vsapi.?.getWritePtr.?(dst, plane);
                 const stride: usize = @intCast(vsapi.?.getStride.?(src, plane));
                 const h: usize = @intCast(vsapi.?.getFrameHeight.?(src, plane));
                 const w: usize = @intCast(vsapi.?.getFrameWidth.?(src, plane));
@@ -52,15 +52,15 @@ export fn zboxblurGetFrame(n: c_int, activationReason: c_int, instanceData: ?*an
                 int_process.vblur(u8, dstp, stride, dstp, stride, w, h, d.vradius, d.vpasses, tmp1.ptr, tmp2.ptr, psize);
             }
         } else if (psize == 2) {
-            var tmp1 = allocator.alloc(u16, npixel) catch unreachable;
-            var tmp2 = allocator.alloc(u16, npixel) catch unreachable;
+            const tmp1 = allocator.alloc(u16, npixel) catch unreachable;
+            const tmp2 = allocator.alloc(u16, npixel) catch unreachable;
             defer allocator.free(tmp1);
             defer allocator.free(tmp2);
 
             var plane: c_int = 0;
             while (plane < fi.*.numPlanes) : (plane += 1) {
-                var srcp: [*]const u8 = vsapi.?.getReadPtr.?(src, plane);
-                var dstp: [*]u8 = vsapi.?.getWritePtr.?(dst, plane);
+                const srcp: [*]const u8 = vsapi.?.getReadPtr.?(src, plane);
+                const dstp: [*]u8 = vsapi.?.getWritePtr.?(dst, plane);
                 const stride: usize = @intCast(vsapi.?.getStride.?(src, plane));
                 const h: usize = @intCast(vsapi.?.getFrameHeight.?(src, plane));
                 const w: usize = @intCast(vsapi.?.getFrameWidth.?(src, plane));
@@ -69,15 +69,15 @@ export fn zboxblurGetFrame(n: c_int, activationReason: c_int, instanceData: ?*an
                 int_process.vblur(u16, dstp, stride, dstp, stride, w, h, d.vradius, d.vpasses, tmp1.ptr, tmp2.ptr, psize);
             }
         } else {
-            var tmp1 = allocator.alloc(f32, npixel) catch unreachable;
-            var tmp2 = allocator.alloc(f32, npixel) catch unreachable;
+            const tmp1 = allocator.alloc(f32, npixel) catch unreachable;
+            const tmp2 = allocator.alloc(f32, npixel) catch unreachable;
             defer allocator.free(tmp1);
             defer allocator.free(tmp2);
 
             var plane: c_int = 0;
             while (plane < fi.*.numPlanes) : (plane += 1) {
-                var srcp: [*]const u8 = vsapi.?.getReadPtr.?(src, plane);
-                var dstp: [*]u8 = vsapi.?.getWritePtr.?(dst, plane);
+                const srcp: [*]const u8 = vsapi.?.getReadPtr.?(src, plane);
+                const dstp: [*]u8 = vsapi.?.getWritePtr.?(dst, plane);
                 const stride: usize = @intCast(vsapi.?.getStride.?(src, plane));
                 const h: usize = @intCast(vsapi.?.getFrameHeight.?(src, plane));
                 const w: usize = @intCast(vsapi.?.getFrameWidth.?(src, plane));
@@ -94,7 +94,7 @@ export fn zboxblurGetFrame(n: c_int, activationReason: c_int, instanceData: ?*an
 
 export fn zboxblurFree(instanceData: ?*anyopaque, core: ?*c.VSCore, vsapi: ?*const c.VSAPI) callconv(.C) void {
     _ = core;
-    var d: *ZboxblurData = @ptrCast(@alignCast(instanceData));
+    const d: *ZboxblurData = @ptrCast(@alignCast(instanceData));
     vsapi.?.freeNode.?(d.node);
     allocator.destroy(d);
 }
@@ -105,7 +105,7 @@ export fn zboxblurCreate(in: ?*const c.VSMap, out: ?*c.VSMap, userData: ?*anyopa
     var err: c_int = undefined;
 
     d.node = vsapi.?.mapGetNode.?(in, "clip", 0, 0).?;
-    var vi: *const c.VSVideoInfo = vsapi.?.getVideoInfo.?(d.node);
+    const vi: *const c.VSVideoInfo = vsapi.?.getVideoInfo.?(d.node);
 
     d.psize = @as(u6, @intCast(vi.format.bytesPerSample));
 
@@ -135,7 +135,7 @@ export fn zboxblurCreate(in: ?*const c.VSMap, out: ?*c.VSMap, userData: ?*anyopa
         return;
     }
 
-    var data: *ZboxblurData = allocator.create(ZboxblurData) catch unreachable;
+    const data: *ZboxblurData = allocator.create(ZboxblurData) catch unreachable;
     data.* = d;
 
     var deps = [_]c.VSFilterDependency{
