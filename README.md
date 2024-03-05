@@ -1,3 +1,8 @@
+> [!CAUTION] 
+> DEPRECATED! Use https://github.com/dnjulek/vapoursynth-zip
+
+
+
 # vapoursynth-zboxblur
 [![Linux](https://github.com/dnjulek/vapoursynth-zboxblur/actions/workflows/linux-build.yml/badge.svg)](https://github.com/dnjulek/vapoursynth-zboxblur/actions/workflows/linux-build.yml)
 [![Windows](https://github.com/dnjulek/vapoursynth-zboxblur/actions/workflows/windows-build.yml/badge.svg)](https://github.com/dnjulek/vapoursynth-zboxblur/actions/workflows/windows-build.yml)
